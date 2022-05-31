@@ -20,26 +20,26 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="title: 利用Hexo搭建个人博客一、环境准备安装Node.js直接到官网上下载安装即可https:&#x2F;&#x2F;nodejs.org&#x2F;en&#x2F;download&#x2F; 安装完成可以用打开cmd检验一下是否安装成功，用 node -v 和 npm -v 命令检查版本 设置npm在安装全局模块时的路径和环境变量因为如果不设置的话，安装模块的时候就会把模块装到C盘，占用C盘的空间，并且有可能安装好hexo后却无法">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Kinnx&#39;s Binary world">
-<meta property="og:url" content="http://example.com/archives/Blog.html">
+  <meta name="description" content="一、环境准备安装Node.js直接到官网上下载安装即可https:&#x2F;&#x2F;nodejs.org&#x2F;en&#x2F;download&#x2F; 安装完成可以用打开cmd检验一下是否安装成功，用 node -v 和 npm -v 命令检查版本 设置npm在安装全局模块时的路径和环境变量因为如果不设置的话，安装模块的时候就会把模块装到C盘，占用C盘的空间，并且有可能安装好hexo后却无法使用，所以我们需要设置一下： 在 nod">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用Hexo搭建个人博客">
+<meta property="og:url" content="http://example.com/2022/05/30/blog-0/index.html">
 <meta property="og:site_name" content="Kinnx&#39;s Binary world">
-<meta property="og:description" content="title: 利用Hexo搭建个人博客一、环境准备安装Node.js直接到官网上下载安装即可https:&#x2F;&#x2F;nodejs.org&#x2F;en&#x2F;download&#x2F; 安装完成可以用打开cmd检验一下是否安装成功，用 node -v 和 npm -v 命令检查版本 设置npm在安装全局模块时的路径和环境变量因为如果不设置的话，安装模块的时候就会把模块装到C盘，占用C盘的空间，并且有可能安装好hexo后却无法">
+<meta property="og:description" content="一、环境准备安装Node.js直接到官网上下载安装即可https:&#x2F;&#x2F;nodejs.org&#x2F;en&#x2F;download&#x2F; 安装完成可以用打开cmd检验一下是否安装成功，用 node -v 和 npm -v 命令检查版本 设置npm在安装全局模块时的路径和环境变量因为如果不设置的话，安装模块的时候就会把模块装到C盘，占用C盘的空间，并且有可能安装好hexo后却无法使用，所以我们需要设置一下： 在 nod">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://example.com/image-20220530010948623.png">
+<meta property="og:image" content="http://example.com/%5CBlog%5Cpublic%5Cimages%5Cblog%5Cimage-20220530010948623.png">
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-2b8ee5f8f53ab2db8fc6f9739e481de9_720w.jpg">
-<meta property="og:image" content="http://example.com/image-20220530005531819.png">
-<meta property="og:image" content="http://example.com/image-20220530005951082.png">
-<meta property="og:image" content="http://example.com/image-20220530010009104.png">
-<meta property="og:image" content="http://example.com/image-20220530010743748.png">
-<meta property="article:published_time" content="2022-05-29T17:17:12.369Z">
-<meta property="article:modified_time" content="2022-05-29T17:17:12.357Z">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/05/31/629574236fdb1.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/05/31/6295743dbe6e3.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/05/31/62957431c0911.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/05/31/629574cd20a36.png">
+<meta property="article:published_time" content="2022-05-29T17:22:40.874Z">
+<meta property="article:modified_time" content="2022-05-31T01:52:28.043Z">
 <meta property="article:author" content="Kinnx">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/image-20220530010948623.png">
+<meta name="twitter:image" content="http://example.com/%5CBlog%5Cpublic%5Cimages%5Cblog%5Cimage-20220530010948623.png">
 
-<link rel="canonical" href="http://example.com/archives/Blog">
+<link rel="canonical" href="http://example.com/2022/05/30/blog-0/">
 
 
 <script id="page-configurations">
@@ -47,13 +47,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title> | Kinnx's Binary world
-</title>
+  <title>利用Hexo搭建个人博客 | Kinnx's Binary world</title>
   
 
 
@@ -160,38 +159,63 @@
       <div class="main-inner">
         <div class="content-wrap">
           
-  
-  
 
-          <div class="content page posts-expand">
+          <div class="content post posts-expand">
             
 
     
-    
-    
-    <div class="post-block" lang="zh-CN">
-      <header class="post-header">
-
-<h1 class="post-title" itemprop="name headline">
-</h1>
-
-<div class="post-meta">
   
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/30/blog-0/">
 
-</div>
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Kinnx">
+      <meta itemprop="description" content="">
+    </span>
 
-</header>
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kinnx's Binary world">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          利用Hexo搭建个人博客
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-05-30 01:22:40" itemprop="dateCreated datePublished" datetime="2022-05-30T01:22:40+08:00">2022-05-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-31 09:52:28" itemprop="dateModified" datetime="2022-05-31T09:52:28+08:00">2022-05-31</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-      
-      
-      <div class="post-body">
-          <hr>
-<h2 id="title-利用Hexo搭建个人博客"><a href="#title-利用Hexo搭建个人博客" class="headerlink" title="title: 利用Hexo搭建个人博客"></a>title: 利用Hexo搭建个人博客</h2><h2 id="一、环境准备"><a href="#一、环境准备" class="headerlink" title="一、环境准备"></a>一、环境准备</h2><h3 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node.js"></a>安装Node.js</h3><p>直接到官网上下载安装即可<a target="_blank" rel="noopener" href="https://nodejs.org/en/download/">https://nodejs.org/en/download/</a></p>
+        <h2 id="一、环境准备"><a href="#一、环境准备" class="headerlink" title="一、环境准备"></a>一、环境准备</h2><h3 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node.js"></a>安装Node.js</h3><p>直接到官网上下载安装即可<a target="_blank" rel="noopener" href="https://nodejs.org/en/download/">https://nodejs.org/en/download/</a></p>
 <p>安装完成可以用打开cmd检验一下是否安装成功，用 <code>node -v</code> 和 <code>npm -v</code> 命令检查版本</p>
 <h3 id="设置npm在安装全局模块时的路径和环境变量"><a href="#设置npm在安装全局模块时的路径和环境变量" class="headerlink" title="设置npm在安装全局模块时的路径和环境变量"></a>设置npm在安装全局模块时的路径和环境变量</h3><p>因为如果不设置的话，安装模块的时候就会把模块装到C盘，占用C盘的空间，并且有可能安装好hexo后却无法使用，所以我们需要设置一下：</p>
 <p>在 nodejs 文件夹中新建两个空文件夹 node_cache、node_global，如下图：**(两个文件夹需要管理员权限)**</p>
-<p><img src="/image-20220530010948623.png" alt="image-20220530010948623"></p>
+<p><img src="/%5CBlog%5Cpublic%5Cimages%5Cblog%5Cimage-20220530010948623.png"></p>
 <p>打开cmd，输入如下两个命令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> prefix <span class="string">&quot;D:\nodejs\node_global&quot;</span></span><br><span class="line">npm config <span class="built_in">set</span> cache <span class="string">&quot;D:\nodejs\node_cache&quot;</span></span><br></pre></td></tr></table></figure>
 
@@ -208,15 +232,15 @@
 
 
 <h2 id="二、安装Hexo"><a href="#二、安装Hexo" class="headerlink" title="二、安装Hexo"></a>二、安装Hexo</h2><p>先在GitHub上创立一个仓库，如下图：</p>
-<p><img src="/image-20220530005531819.png" alt="image-20220530005531819"></p>
+<p><img src="https://kinnx.xyz/i/2022/05/31/629574236fdb1.png" alt="image-20220530005531819"></p>
 <p>接下来就是安装Hexo，首先在D盘建立一个文件夹 Blog，点开 Blog 文件夹，鼠标右键打开 Git Bush Here，输入npm命令安装Hexo：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
 
 
 
-<p><img src="/image-20220530005951082.png" alt="image-20220530005951082"></p>
+<p><img src="https://kinnx.xyz/i/2022/05/31/6295743dbe6e3.png" alt="image-20220530005951082"></p>
 <p>安装完成后，输入 hexo init 命令初始化博客：</p>
-<p><img src="/image-20220530010009104.png" alt="image-20220530010009104"></p>
+<p><img src="https://kinnx.xyz/i/2022/05/31/62957431c0911.png" alt="image-20220530010009104"></p>
 <h3 id="将Hexo部署到GitHub"><a href="#将Hexo部署到GitHub" class="headerlink" title="将Hexo部署到GitHub"></a>将Hexo部署到GitHub</h3><p>现在回到我们的 Blog 文件夹，用笔记本打开 _config.yml 文件</p>
 <p>下滑到文件底部，填上如下内容：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: https://github.com/Kinnx/Kinnx.github.io.git  #仓库地址</span><br><span class="line">  branch: main</span><br></pre></td></tr></table></figure>
@@ -232,12 +256,12 @@
 
 
 <h2 id="三、解析域名"><a href="#三、解析域名" class="headerlink" title="三、解析域名"></a>三、解析域名</h2><p>打开 Blog 文件夹里的 source 文件夹，添加CNAME文件，可以先创建一个CNAME.txt文件，打开后写上域名 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kinnx.xyz</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xenoverse.cloud</span><br></pre></td></tr></table></figure>
 
 
 
-<p>登录腾讯云，点击控制台，在你已购买的域名后点击解析添加两条解析记录</p>
-<p><img src="/image-20220530010743748.png" alt="image-20220530010743748"></p>
+<p>登录阿里云，点击控制台，在你已购买的域名后点击解析添加解析记录</p>
+<p><img src="https://kinnx.xyz/i/2022/05/31/629574cd20a36.png" alt="image-20220531095210390"></p>
 <h2 id="四、更换主题"><a href="#四、更换主题" class="headerlink" title="四、更换主题"></a>四、更换主题</h2><p>当前用得最多的是next主题，那为什么用得多呢？当然是符合大多数人的审美。我使用的是next(v7.7.1)，下载地址：<a href="https://link.zhihu.com/?target=https://github.com/theme-next/hexo-theme-next">theme-next&#x2F;hexo-theme-next</a></p>
 <p>打开博客根目录Blog文件夹，右键Git Bash，输入如下代码将next主题下载到目录Blog&#x2F;themes：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next</span><br></pre></td></tr></table></figure>
@@ -254,16 +278,35 @@
 
 <p>至此 Hexo博客的架构搭建完成</p>
 
-      </div>
-      
-      
-      
     </div>
-    
 
     
     
     
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/30/Blog/" rel="prev" title="利用Hexo搭建个人博客">
+      <i class="fa fa-chevron-left"></i> 利用Hexo搭建个人博客
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/05/31/lskypro/" rel="next" title="lskypro">
+      lskypro <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
 
 
           </div>
@@ -314,7 +357,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#title-%E5%88%A9%E7%94%A8Hexo%E6%90%AD%E5%BB%BA%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2"><span class="nav-number">1.</span> <span class="nav-text">title: 利用Hexo搭建个人博客</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">2.</span> <span class="nav-text">一、环境准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Node-js"><span class="nav-number">2.1.</span> <span class="nav-text">安装Node.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEnpm%E5%9C%A8%E5%AE%89%E8%A3%85%E5%85%A8%E5%B1%80%E6%A8%A1%E5%9D%97%E6%97%B6%E7%9A%84%E8%B7%AF%E5%BE%84%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">2.2.</span> <span class="nav-text">设置npm在安装全局模块时的路径和环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">2.3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85git"><span class="nav-number">2.4.</span> <span class="nav-text">安装git</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85Hexo"><span class="nav-number">3.</span> <span class="nav-text">二、安装Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86Hexo%E9%83%A8%E7%BD%B2%E5%88%B0GitHub"><span class="nav-number">3.1.</span> <span class="nav-text">将Hexo部署到GitHub</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%A7%A3%E6%9E%90%E5%9F%9F%E5%90%8D"><span class="nav-number">4.</span> <span class="nav-text">三、解析域名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%9B%B4%E6%8D%A2%E4%B8%BB%E9%A2%98"><span class="nav-number">5.</span> <span class="nav-text">四、更换主题</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">1.</span> <span class="nav-text">一、环境准备</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Node-js"><span class="nav-number">1.1.</span> <span class="nav-text">安装Node.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEnpm%E5%9C%A8%E5%AE%89%E8%A3%85%E5%85%A8%E5%B1%80%E6%A8%A1%E5%9D%97%E6%97%B6%E7%9A%84%E8%B7%AF%E5%BE%84%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">1.2.</span> <span class="nav-text">设置npm在安装全局模块时的路径和环境变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">1.3.</span> <span class="nav-text">测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85git"><span class="nav-number">1.4.</span> <span class="nav-text">安装git</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85Hexo"><span class="nav-number">2.</span> <span class="nav-text">二、安装Hexo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%86Hexo%E9%83%A8%E7%BD%B2%E5%88%B0GitHub"><span class="nav-number">2.1.</span> <span class="nav-text">将Hexo部署到GitHub</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%A7%A3%E6%9E%90%E5%9F%9F%E5%90%8D"><span class="nav-number">3.</span> <span class="nav-text">三、解析域名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%9B%B4%E6%8D%A2%E4%B8%BB%E9%A2%98"><span class="nav-number">4.</span> <span class="nav-text">四、更换主题</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
