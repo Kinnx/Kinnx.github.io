@@ -20,28 +20,34 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Kinnx&#39;s Binary world">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="总体架构涉及到的关键类:​       EventLoop：事件循环核心类，遵循per thread one loop的思想，一个线程一个事件循环，在循环中用IO多路复用，分发IO事件。    EventLoopThread:封装了std::thread，可以启动一个线程，并执行EventLoop的循环。     EventLoopThreadPoll:用于管理EventLoopThread的线程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="muduo网络库（c++11源码剖析）">
+<meta property="og:url" content="http://example.com/2022/05/31/muduo/index.html">
 <meta property="og:site_name" content="Kinnx&#39;s Binary world">
+<meta property="og:description" content="总体架构涉及到的关键类:​       EventLoop：事件循环核心类，遵循per thread one loop的思想，一个线程一个事件循环，在循环中用IO多路复用，分发IO事件。    EventLoopThread:封装了std::thread，可以启动一个线程，并执行EventLoop的循环。     EventLoopThreadPoll:用于管理EventLoopThread的线程">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/05/31/6295a1368c926.png">
+<meta property="article:published_time" content="2022-05-31T04:58:20.000Z">
+<meta property="article:modified_time" content="2022-05-31T05:47:21.697Z">
 <meta property="article:author" content="Kinnx">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kinnx.xyz/i/2022/05/31/6295a1368c926.png">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://example.com/2022/05/31/muduo/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>Kinnx's Binary world</title>
+  <title>muduo网络库（c++11源码剖析） | Kinnx's Binary world</title>
   
 
 
@@ -149,9 +155,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -167,10 +174,9 @@
       <meta itemprop="name" content="Kinnx's Binary world">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/05/31/muduo/" class="post-title-link" itemprop="url">muduo网络库（c++11源码剖析）</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          muduo网络库（c++11源码剖析）
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -194,7 +200,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h3 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a>总体架构</h3><h4 id="涉及到的关键类"><a href="#涉及到的关键类" class="headerlink" title="涉及到的关键类:"></a>涉及到的关键类:</h4><p>​       EventLoop：事件循环核心类，遵循<strong>per thread one loop</strong>的思想，一个线程一个事件循环，在循环中用IO多路复用，分发IO事件。</p>
+        <h3 id="总体架构"><a href="#总体架构" class="headerlink" title="总体架构"></a>总体架构</h3><h4 id="涉及到的关键类"><a href="#涉及到的关键类" class="headerlink" title="涉及到的关键类:"></a>涉及到的关键类:</h4><p>​       EventLoop：事件循环核心类，遵循<strong>per thread one loop</strong>的思想，一个线程一个事件循环，在循环中用IO多路复用，分发IO事件。</p>
 <pre><code>   EventLoopThread:封装了std::thread，可以启动一个线程，并执行EventLoop的循环。
 
    EventLoopThreadPoll:用于管理EventLoopThread的线程池，启动线程，结束线程，可以将获取的任务分派到执行                         EventLoop的线程里。
@@ -361,356 +367,30 @@
 
 <p>​	由IO多路复用检测到事件，通过Channel处理可读事件，回调到该函数的handleRead()，最终触发TcpServer::newConnection创建新连接。</p>
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/31/lskypro/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Kinnx">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Kinnx's Binary world">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/05/31/lskypro/" class="post-title-link" itemprop="url">更优雅的写博客：Lsky Pro + PicGo + Typora图床配置 （docker + 腾讯云）</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-05-31 09:53:03 / 修改时间：10:48:48" itemprop="dateCreated datePublished" datetime="2022-05-31T09:53:03+08:00">2022-05-31</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>Lsky Pro</strong> 是一个用于在线上传、管理图片的图床程序，中文名：兰空图床，你可以将它作为自己的云上相册，亦可以当作你的写作贴图库。</p>
-<p><strong>PicGo:</strong> 一个用于快速上传图片并获取图片 URL 链接的工具</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/629575febaaa6.png" alt="image-20220531095714636"></p>
-<h3 id="项目展示"><a href="#项目展示" class="headerlink" title="项目展示"></a>项目展示</h3><p>GitHub原项目地址（感谢作者的付出）：<a target="_blank" rel="noopener" href="https://github.com/lsky-org/lsky-pro%EF%BC%882.3k">https://github.com/lsky-org/lsky-pro（2.3k</a> star）</p>
-<p>官网地址：<a target="_blank" rel="noopener" href="https://www.lsky.pro/">https://www.lsky.pro/</a></p>
-<p>文档地址：<a target="_blank" rel="noopener" href="https://docs.lsky.pro/">https://docs.lsky.pro/</a></p>
-<p>本期用的Docker镜像地址 （感谢@Allen Hua）：<a target="_blank" rel="noopener" href="https://hub.docker.com/r/dko0/lsky-pro">https://hub.docker.com/r/dko0/lsky-pro</a></p>
-<p>PicGo插件：lankong（再次感谢@Allen Hua）<a target="_blank" rel="noopener" href="https://hellodk.cn/post/964">https://hellodk.cn/post/964</a></p>
-<h3 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h3><p>服务器：腾讯轻量应用服务器<br>系统：Centos7.8<br>域名一枚，并做好解析到服务器上（公网地址）<br>Docker、Docker-compose（相关脚本）<br>Nginx Proxy Manager</p>
-<h3 id="搭建方法"><a href="#搭建方法" class="headerlink" title="搭建方法"></a>搭建方法</h3><h4 id="基础docker设置"><a href="#基础docker设置" class="headerlink" title="基础docker设置"></a>基础docker设置</h4><p>初始化环境必要设置</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo -i        			              <span class="comment"># 切换到root用户</span></span><br><span class="line"></span><br><span class="line">yum update -y 		                  <span class="comment"># 升级packages</span></span><br><span class="line"></span><br><span class="line">yum install wget curl sudo vim git    <span class="comment"># 安装必要插件</span></span><br></pre></td></tr></table></figure>
+        
 
 
-
-<p>创建安装目录：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /root/data/docker_data/lsky-pro</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> /root/data/docker_data/lsky-pro</span><br><span class="line"></span><br><span class="line">nano docker-compose.yml</span><br></pre></td></tr></table></figure>
-
-<p>在 docker-compose.yml 填入以下内容</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&#x27;3&#x27;</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">    <span class="attr">lsky-pro:</span></span><br><span class="line">        <span class="attr">container_name:</span> <span class="string">lsky-pro</span>			<span class="comment">#lsky-pro container</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">dko0/lsky-pro</span></span><br><span class="line">        <span class="attr">restart:</span> <span class="string">always</span></span><br><span class="line">        <span class="attr">volumes:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">/root/data/docker_data/lsky-pro/lsky-pro-data:/var/www/html</span>  <span class="comment">#映射到本地</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="number">7791</span><span class="string">:80</span>						<span class="comment">#开放端口 外网7791 内网80</span></span><br><span class="line">        <span class="attr">environment:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_HOST=mysql</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_DATABASE=lsky-pro</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_USER=********</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_PASSWORD=*******</span></span><br><span class="line">    <span class="attr">app:</span>									<span class="comment">#nginx proxy manager设置</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">&#x27;jc21/nginx-proxy-manager:latest&#x27;</span></span><br><span class="line">        <span class="attr">restart:</span> <span class="string">unless-stopped</span></span><br><span class="line">        <span class="attr">ports:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">&#x27;80:80&#x27;</span>							<span class="comment">#http端口</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">&#x27;81:81&#x27;</span>							<span class="comment">#admin端口</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">&#x27;443:443&#x27;</span>						<span class="comment">#https端口</span></span><br><span class="line">        <span class="attr">environment:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_HOST=mysql</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_DATABASE=lsky-pro</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_USER=********</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">MYSQL_PASSWORD=*********</span></span><br><span class="line">        <span class="attr">volumes:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">./data:/data</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">./letsencrypt:/etc/letsencrypt</span></span><br><span class="line">    <span class="attr">mysql:</span>									<span class="comment">#database</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">mysql:8.0</span></span><br><span class="line">        <span class="attr">container_name:</span> <span class="string">lsky-pro-db</span></span><br><span class="line">        <span class="attr">restart:</span> <span class="string">always</span></span><br><span class="line">        <span class="attr">environment:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">MYSQL_DATABASE=lsky-pro</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">MYSQL_USER=lsky-pro</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">MYSQL_PASSWORD=*******</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">MYSQL_ROOT_PASSWORD=*******</span></span><br><span class="line">        <span class="attr">volumes:</span></span><br><span class="line">          <span class="bullet">-</span> <span class="string">/root/data/docker_data/lsky-pro/db:/var/lib/mysql</span></span><br></pre></td></tr></table></figure>
-
-<p>没问题的话，ctrl+x退出，按y保存，enter确认。</p>
-<p>查看端口是否被占用</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsof -i:7791  <span class="comment">#查看7791端口是否被占用，如果被占用，重新自定义一个端口</span></span><br></pre></td></tr></table></figure>
-
-<p>如果出现：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-bash: lsof: command not found</span><br></pre></td></tr></table></figure>
-
-<p>运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install lsof  <span class="comment">#安装lsof</span></span><br></pre></td></tr></table></figure>
-
-<p>如果端口没有被占用，运行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose up -d </span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="利用Nginx-Proxy-Manager反向代理"><a href="#利用Nginx-Proxy-Manager反向代理" class="headerlink" title="利用Nginx Proxy Manager反向代理"></a>利用Nginx Proxy Manager反向代理</h4><p>在添加反向代理之前，确保你已经完成了域名解析</p>
-<p>注意，对于Nginx Proxy Manager，可能存在系统占用默认端口80,443的情况，可以改端口号</p>
-<p>访问NPM：</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/629579aaba5a9.png" alt="image-20220531101254392"></p>
-<p>添加proxy host</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/629579cc78c0e.png" alt="image-20220531101328943"></p>
-<p>申请SSL证书（如果不是默认端口80,443，申请SSL可能出现Internal Error）</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/629579e2ba065.png" alt="image-20220531101351462"></p>
-<p>至此，访问：http:服务ip:7791 或者 域名 皆可登录  lsky-pro</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">注意：</span><br><span class="line"></span><br><span class="line">1、不知道服务器IP，可以直接在命令行输入：curl ip.sb，会显示当前服务器的IP。</span><br><span class="line"></span><br><span class="line">2、遇到访问不了的情况，请在服务器系统的后台防火墙里打开对应端口。</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="使用教程"><a href="#使用教程" class="headerlink" title="使用教程"></a>使用教程</h4><p>安装界面 因为是docker容器配置，不需要自己搭建运行环境</p>
-<img src="https://kinnx.xyz/i/2022/05/31/62957cd5ef725.png" alt="image-20220531102627370" style="zoom: 67%;" />
-
-
-
-<p>配置数据库 ，因为docker-compose 把数据库和lsky安装在一起，所以数据库链接地址就是docker容器名</p>
-<img src="https://kinnx.xyz/i/2022/05/31/62957d6caa639.png" alt="image-20220531102858072" style="zoom:67%;" />
-
-
-
-<p>创建完成</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957db2b3790.png" alt="image-20220531103008352"></p>
-<h3 id="配置PicGo和Typora"><a href="#配置PicGo和Typora" class="headerlink" title="配置PicGo和Typora"></a>配置PicGo和Typora</h3><h4 id="获取token配置PicGo"><a href="#获取token配置PicGo" class="headerlink" title="获取token配置PicGo"></a>获取token配置PicGo</h4><p>根据lsky-pro的接口，post请求获取token</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957e7cee5c2.png" alt="image-20220531103330402"></p>
-<p>使用 <a target="_blank" rel="noopener" href="https://www.sojson.com/httpRequest/">https://www.sojson.com/httpRequest/</a></p>
-<p>post的地址是 https:&#x2F;&#x2F;你的网站&#x2F;api&#x2F;v1&#x2F;tokens</p>
-<p>然后参数就是email和password两个常规参数，直接post</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957ed3cf7a0.png" alt="image-20220531103456834"></p>
-<p>在Response Body 找到token</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957f383d64a.png" alt="image-20220531103637378"></p>
-<p>下载PicGo 插件 <a target="_blank" rel="noopener" href="https://github.com/Molunerfinn/PicGo">https://github.com/Molunerfinn/PicGo</a>    不同系统下载对应版本</p>
-<p>在插件中寻找lankong 并且安装</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957f7e5c09b.png" alt="image-20220531103747922"></p>
-<p>配置图床信息如图</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957fabac395.png" alt="image-20220531103833274"></p>
-<p>注意Server为你的兰空图床站点，不要&#x2F;结尾                 Bearer和token中间有空格。</p>
-<h4 id="typora配置PicGo"><a href="#typora配置PicGo" class="headerlink" title="typora配置PicGo"></a>typora配置PicGo</h4><p><img src="https://kinnx.xyz/i/2022/05/31/62958051d1ecd.png" alt="image-20220531104118391"></p>
-<p>至此配置已完成</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">https://blog.laoda.de/archives/docker-compose-install-lskypro #教程</span><br><span class="line"></span><br><span class="line">https://github.com/lsky-org/lsky-pro							</span><br><span class="line"></span><br><span class="line">https://www.lsky.pro/</span><br><span class="line"></span><br><span class="line">https://docs.lsky.pro/</span><br><span class="line"></span><br><span class="line">https://www.sojson.com/httpRequest/</span><br><span class="line"></span><br><span class="line">本期用的Docker镜像地址 （感谢@Allen Hua）：https://hub.docker.com/r/dko0/lsky-pro</span><br><span class="line"></span><br><span class="line">PicGo插件：lankong（再次感谢@Allen Hua）https://hellodk.cn/post/964</span><br><span class="line"></span><br><span class="line">https://www.nesxc.com/1068/</span><br></pre></td></tr></table></figure>
-
-      
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/31/lskypro/" rel="prev" title="更优雅的写博客：Lsky Pro + PicGo + Typora图床配置 （docker + 腾讯云）">
+      <i class="fa fa-chevron-left"></i> 更优雅的写博客：Lsky Pro + PicGo + Typora图床配置 （docker + 腾讯云）
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/30/Blog/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Kinnx">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Kinnx's Binary world">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/05/30/Blog/" class="post-title-link" itemprop="url">利用Hexo搭建个人博客</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-05-30 01:20:45" itemprop="dateCreated datePublished" datetime="2022-05-30T01:20:45+08:00">2022-05-30</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-31 10:51:44" itemprop="dateModified" datetime="2022-05-31T10:51:44+08:00">2022-05-31</time>
-              </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、环境准备"><a href="#一、环境准备" class="headerlink" title="一、环境准备"></a>一、环境准备</h2><h3 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node.js"></a>安装Node.js</h3><p>直接到官网上下载安装即可<a target="_blank" rel="noopener" href="https://nodejs.org/en/download/">https://nodejs.org/en/download/</a></p>
-<p>安装完成可以用打开cmd检验一下是否安装成功，用 <code>node -v</code> 和 <code>npm -v</code> 命令检查版本</p>
-<h3 id="设置npm在安装全局模块时的路径和环境变量"><a href="#设置npm在安装全局模块时的路径和环境变量" class="headerlink" title="设置npm在安装全局模块时的路径和环境变量"></a>设置npm在安装全局模块时的路径和环境变量</h3><p>因为如果不设置的话，安装模块的时候就会把模块装到C盘，占用C盘的空间，并且有可能安装好hexo后却无法使用，所以我们需要设置一下：</p>
-<p>在 nodejs 文件夹中新建两个空文件夹 node_cache、node_global，如下图：**(两个文件夹需要管理员权限)**</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/6295828a72be8.png" alt="image-20220530010948623"></p>
-<p>打开cmd，输入如下两个命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm config <span class="built_in">set</span> prefix <span class="string">&quot;D:\nodejs\node_global&quot;</span></span><br><span class="line">npm config <span class="built_in">set</span> cache <span class="string">&quot;D:\nodejs\node_cache&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>设置环境变量：<strong>win10系统 –&gt; 打开控制面板 –&gt; 系统 –&gt;高级系统设置 –&gt; 环境变量 ，</strong>然后在<strong>系统变量</strong>中新建一个变量名为“NODE_PATH”，值为“D:\nodejs\node_global\node_modules”</p>
-<p>然后编辑<strong>用户变量</strong>里的Path，将相应npm的路径改为：D:\nodejs\node_global</p>
-<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>在 cmd 命令下执行 </p>
-<p><code>npm install webpack -g</code></p>
-<p>然后 webpack 这个模块已经在我们设置默认的文件夹中了：</p>
-<p><img src="https://pic2.zhimg.com/80/v2-2b8ee5f8f53ab2db8fc6f9739e481de9_720w.jpg" alt="img"></p>
-<h3 id="安装git"><a href="#安装git" class="headerlink" title="安装git"></a>安装git</h3><p>Windows：下载并安装<a target="_blank" rel="noopener" href="https://git-scm.com/download/win">https://git-scm.com/download/win</a></p>
-<p>Centos：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install git-core</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="二、安装Hexo"><a href="#二、安装Hexo" class="headerlink" title="二、安装Hexo"></a>二、安装Hexo</h2><p>先在GitHub上创立一个仓库，如下图：</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/629574236fdb1.png" alt="image-20220530005531819"></p>
-<p>接下来就是安装Hexo，首先在D盘建立一个文件夹 Blog，点开 Blog 文件夹，鼠标右键打开 Git Bush Here，输入npm命令安装Hexo：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
-
-
-
-<p><img src="https://kinnx.xyz/i/2022/05/31/6295743dbe6e3.png" alt="image-20220530005951082"></p>
-<p>安装完成后，输入 hexo init 命令初始化博客：</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/62957431c0911.png" alt="image-20220530010009104"></p>
-<h3 id="将Hexo部署到GitHub"><a href="#将Hexo部署到GitHub" class="headerlink" title="将Hexo部署到GitHub"></a>将Hexo部署到GitHub</h3><p>现在回到我们的 Blog 文件夹，用笔记本打开 _config.yml 文件</p>
-<p>下滑到文件底部，填上如下内容：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">  type: git</span><br><span class="line">  repository: https://github.com/Kinnx/Kinnx.github.io.git  #仓库地址</span><br><span class="line">  branch: main</span><br></pre></td></tr></table></figure>
-
-<p>然后回到 Blog 文件夹中，打开 Git Bash，安装Git部署插件，输入命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-
-<p>然后分别输入以下三条命令：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean   #清除缓存文件 db.json 和已生成的静态文件 public</span><br><span class="line">hexo g       #生成网站静态文件到默认设置的 public 文件夹(hexo generate 的缩写)</span><br><span class="line">hexo d       #自动生成网站静态文件，并部署到设定的仓库(hexo deploy 的缩写)</span><br></pre></td></tr></table></figure>
-
-
-
-
-
-<h2 id="三、解析域名"><a href="#三、解析域名" class="headerlink" title="三、解析域名"></a>三、解析域名</h2><p>打开 Blog 文件夹里的 source 文件夹，添加CNAME文件，可以先创建一个CNAME.txt文件，打开后写上域名 </p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xenoverse.cloud</span><br></pre></td></tr></table></figure>
-
-
-
-<p>登录阿里云，点击控制台，在你已购买的域名后点击解析添加解析记录</p>
-<p><img src="https://kinnx.xyz/i/2022/05/31/629574cd20a36.png" alt="image-20220531095210390"></p>
-<h2 id="四、更换主题"><a href="#四、更换主题" class="headerlink" title="四、更换主题"></a>四、更换主题</h2><p>当前用得最多的是next主题，那为什么用得多呢？当然是符合大多数人的审美。我使用的是next(v7.7.1)，下载地址：<a href="https://link.zhihu.com/?target=https://github.com/theme-next/hexo-theme-next">theme-next&#x2F;hexo-theme-next</a></p>
-<p>打开博客根目录Blog文件夹，右键Git Bash，输入如下代码将next主题下载到目录Blog&#x2F;themes：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/theme-next/hexo-theme-next themes/next</span><br></pre></td></tr></table></figure>
-
-
-
-<p>打开根目录下的_config.yml(称为<strong>站点配置文件</strong>)，修改主题（<strong>注意冒号后都要有空格</strong>）</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># Site</span><br><span class="line">title:   #标题</span><br><span class="line">subtitle: &#x27;&#x27;</span><br><span class="line">description:   #简介或者格言</span><br><span class="line">keywords:</span><br><span class="line">author:     #作者</span><br><span class="line">language: zh-CN     #主题语言</span><br><span class="line">timezone: Asia/Shanghai    #中国的时区</span><br><span class="line"></span><br><span class="line"># Extensions</span><br><span class="line">## Plugins: https://hexo.io/plugins/</span><br><span class="line">## Themes: https://hexo.io/themes/</span><br><span class="line">theme: next   #主题改为next</span><br></pre></td></tr></table></figure>
-
-<p>然后</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean   #清除缓存文件 db.json 和已生成的静态文件 public</span><br><span class="line">hexo g       #生成网站静态文件到默认设置的 public 文件夹(hexo generate 的缩写)</span><br><span class="line">hexo d       #自动生成网站静态文件，并部署到设定的仓库(hexo deploy 的缩写)</span><br></pre></td></tr></table></figure>
-
-
-
-<p>至此 Hexo博客的架构搭建完成</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/29/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Kinnx">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Kinnx's Binary world">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/05/29/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-05-29 14:21:13" itemprop="dateCreated datePublished" datetime="2022-05-29T14:21:13+08:00">2022-05-29</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
   
 
 
@@ -763,6 +443,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">总体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%89%E5%8F%8A%E5%88%B0%E7%9A%84%E5%85%B3%E9%94%AE%E7%B1%BB"><span class="nav-number">1.1.</span> <span class="nav-text">涉及到的关键类:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-number">1.2.</span> <span class="nav-text">基本流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EventLoopThread-EventLoopThreadPool"><span class="nav-number">2.</span> <span class="nav-text">EventLoopThread+EventLoopThreadPool</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#EventLoopThreadPool%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">EventLoopThreadPool类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F-%EF%BC%9A"><span class="nav-number">2.1.1.</span> <span class="nav-text">成员变量 ：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A"><span class="nav-number">2.1.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EventLoopThread%E7%B1%BB%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">EventLoopThread类：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%B1%BB%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F-%EF%BC%9A"><span class="nav-number">2.2.1.</span> <span class="nav-text">类成员变量 ：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EventLoop%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.</span> <span class="nav-text">EventLoop设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%EF%BC%9A"><span class="nav-number">3.0.1.</span> <span class="nav-text">成员变量：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A-2"><span class="nav-number">3.0.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Channel%E8%AE%BE%E8%AE%A1"><span class="nav-number">4.</span> <span class="nav-text">Channel设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%EF%BC%9A-1"><span class="nav-number">4.0.1.</span> <span class="nav-text">成员变量：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A-3"><span class="nav-number">4.0.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TcpConnection%E8%AE%BE%E8%AE%A1"><span class="nav-number">5.</span> <span class="nav-text">TcpConnection设计</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%EF%BC%9A-2"><span class="nav-number">5.0.1.</span> <span class="nav-text">成员变量：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A-4"><span class="nav-number">5.0.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TcpServer%E5%92%8CAcceptor%E8%AE%BE%E8%AE%A1"><span class="nav-number">6.</span> <span class="nav-text">TcpServer和Acceptor设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#TcpServer"><span class="nav-number">6.1.</span> <span class="nav-text">TcpServer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%EF%BC%9A-3"><span class="nav-number">6.1.1.</span> <span class="nav-text">成员变量：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A-5"><span class="nav-number">6.1.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Acceptor"><span class="nav-number">6.2.</span> <span class="nav-text">Acceptor</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%88%90%E5%91%98%E5%8F%98%E9%87%8F%EF%BC%9A-4"><span class="nav-number">6.2.1.</span> <span class="nav-text">成员变量：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E5%87%BD%E6%95%B0%E5%8F%8A%E4%BD%9C%E7%94%A8%EF%BC%9A-6"><span class="nav-number">6.2.2.</span> <span class="nav-text">重要函数及作用：</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
