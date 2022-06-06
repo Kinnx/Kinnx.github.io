@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从网卡接收数据说起下图是一个典型的计算机结构图，计算机由CPU、存储器（内存）、网络接口等部件组成。了解epoll本质的第一步，要从硬件的角度看计算机怎样接收网络数据。  ​                                   计算机结构图（图片来源：linux内核完全注释之微型计算机组成结构） 下图展示了网卡接收数据的过程。在①阶段，网卡收到网线传来的数据；经过②阶段的硬件电路的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="epoll原理">
+<meta property="og:url" content="http://example.com/2022/06/06/epoll/index.html">
+<meta property="og:site_name" content="Kinnx&#39;s Binary world">
+<meta property="og:description" content="从网卡接收数据说起下图是一个典型的计算机结构图，计算机由CPU、存储器（内存）、网络接口等部件组成。了解epoll本质的第一步，要从硬件的角度看计算机怎样接收网络数据。  ​                                   计算机结构图（图片来源：linux内核完全注释之微型计算机组成结构） 下图展示了网卡接收数据的过程。在①阶段，网卡收到网线传来的数据；经过②阶段的硬件电路的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df3e140110.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df43708c4f.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df6b46db2f.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df6ed979b4.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df9556c723.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df961dc470.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629df96ce0ba2.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629dfb2bce6f1.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629dfb3dc0e38.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629dfe04c5a90.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629dfec923180.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629dfed937ad3.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e010290282.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e02700af3f.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e02a342e47.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e0320da8dd.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e03308aa65.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e037feb4ba.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e0387a787e.png">
+<meta property="og:image" content="https://kinnx.xyz/i/2022/06/06/629e1482b1669.png">
+<meta property="article:published_time" content="2022-06-06T11:13:14.000Z">
+<meta property="article:modified_time" content="2022-06-06T14:52:30.347Z">
+<meta property="article:author" content="Kinnx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kinnx.xyz/i/2022/06/06/629df3e140110.png">
+
+<link rel="canonical" href="http://example.com/2022/06/06/epoll/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>epoll原理 | Kinnx's Binary world</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kinnx's Binary world</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/06/06/epoll/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Kinnx">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kinnx's Binary world">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          epoll原理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-06-06 19:13:14 / 修改时间：22:52:30" itemprop="dateCreated datePublished" datetime="2022-06-06T19:13:14+08:00">2022-06-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="从网卡接收数据说起"><a href="#从网卡接收数据说起" class="headerlink" title="从网卡接收数据说起"></a>从网卡接收数据说起</h3><p>下图是一个典型的计算机结构图，计算机由CPU、存储器（内存）、网络接口等部件组成。了解epoll本质的第一步，要从硬件的角度看计算机怎样接收网络数据。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df3e140110.png" alt="image-20220606203217658"></p>
+<p>​                                   计算机结构图（图片来源：linux内核完全注释之微型计算机组成结构）</p>
+<p>下图展示了网卡接收数据的过程。在①阶段，网卡收到网线传来的数据；经过②阶段的硬件电路的传输；最终将数据写入到内存中的某个地址上（③阶段）。这个过程涉及到DMA传输、IO通路选择等硬件有关的知识，但我们只需知道：<strong>网卡会把接收到的数据写入内存</strong>。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df43708c4f.png" alt="image-20220606203358673"></p>
+<p>​																网卡接收数据的过程</p>
+<p>通过硬件传输，网卡接收的数据存放到内存中。操作系统就可以去读取它们。</p>
+<h3 id="如何知道接收了数据？"><a href="#如何知道接收了数据？" class="headerlink" title="如何知道接收了数据？"></a>如何知道接收了数据？</h3><p>了解epoll本质的第二步，要从<strong>CPU</strong>的角度来看数据接收。要理解这个问题，要先了解一个概念——中断。</p>
+<p>计算机执行程序时，会有优先级的需求。比如，当计算机收到断电信号时（电容可以保存少许电量，供CPU运行很短的一小段时间），它应立即去保存数据，保存数据的程序具有较高的优先级。</p>
+<p>一般而言，由硬件产生的信号需要cpu立马做出回应（不然数据可能就丢失），所以它的优先级很高。cpu理应中断掉正在执行的程序，去做出响应；当cpu完成对硬件的响应后，再重新执行用户程序。中断的过程如下图，和函数调用差不多。只不过函数调用是事先定好位置，而中断的位置由“信号”决定。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df6b46db2f.png" alt="image-20220606204436088"></p>
+<p>以键盘为例，当用户按下键盘某个按键时，键盘会给cpu的中断引脚发出一个高电平。cpu能够捕获这个信号，然后执行键盘中断程序。下图展示了各种硬件通过中断与cpu交互。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df6ed979b4.png" alt="image-20220606204533342"></p>
+<p>现在可以回答本节提出的问题了：当网卡把数据写入到内存后，<strong>网卡向cpu发出一个中断信号，操作系统便能得知有新数据到来</strong>，再通过网卡<strong>中断程序</strong>去处理数据。</p>
+<h3 id="进程阻塞为什么不占用cpu资源？"><a href="#进程阻塞为什么不占用cpu资源？" class="headerlink" title="进程阻塞为什么不占用cpu资源？"></a>进程阻塞为什么不占用cpu资源？</h3><p>了解epoll本质的第三步，要从操作系统进程调度的角度来看数据接收。阻塞是进程调度的关键一环，指的是进程在等待某事件（如接收到网络数据）发生之前的等待状态，recv、select和epoll都是阻塞方法。<strong>了解“进程阻塞为什么不占用cpu资源？”，也就能够了解这一步。</strong></p>
+<p>为简单起见，我们从普通的recv接收开始分析，先看看下面代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//创建socket</span></span><br><span class="line">SOCKET sockSrv = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line"><span class="comment">//绑定</span></span><br><span class="line"><span class="type">int</span> retVal = <span class="built_in">bind</span>(sockSrv, (SOCKADDR *)&amp;addrSrv, <span class="built_in">sizeof</span>(SOCKADDR));</span><br><span class="line"><span class="comment">//监听，同时能接收10个链接</span></span><br><span class="line"><span class="built_in">listen</span>(sockSrv, <span class="number">10</span>);</span><br><span class="line"><span class="comment">//接受客户端连接</span></span><br><span class="line">SOCKET sockConn = <span class="built_in">accept</span>(sockSrv, (SOCKADDR *)&amp;addrCli, &amp;len);</span><br><span class="line"><span class="comment">//接收客户端数据</span></span><br><span class="line"><span class="built_in">recv</span>(sockConn, recvBuf, <span class="number">100</span>, <span class="number">0</span>);</span><br><span class="line"><span class="comment">//将数据打印出来printf(...)</span></span><br></pre></td></tr></table></figure>
+
+<p>这是一段最基础的网络编程代码，先新建socket对象，依次调用bind、listen、accept，最后调用recv接收数据。recv是个阻塞方法，当程序运行到recv时，它会一直等待，直到接收到数据才往下执行。</p>
+<p>那么阻塞的原理是什么？</p>
+<h4 id="工作队列"><a href="#工作队列" class="headerlink" title="工作队列"></a>工作队列</h4><p>操作系统为了支持多任务，实现了进程调度的功能，会把进程分为“运行”和“等待”等几种状态。运行状态是进程获得cpu使用权，正在执行代码的状态；等待状态是阻塞状态，比如上述程序运行到recv时，程序会从运行状态变为等待状态，接收到数据后又变回运行状态。操作系统会分时执行各个运行状态的进程，由于速度很快，看上去就像是同时执行多个任务。</p>
+<p>下图中的计算机中运行着A、B、C三个进程，其中进程A执行着上述基础网络程序，一开始，这3个进程都被操作系统的工作队列所引用，处于运行状态，会分时执行。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df9556c723.png" alt="image-20220606205549107"></p>
+<p>工作队列中有A、B和C三个进程</p>
+<h4 id="等待队列"><a href="#等待队列" class="headerlink" title="等待队列"></a>等待队列</h4><p>当进程A执行到创建socket的语句时，操作系统会创建一个由文件系统管理的socket对象（如下图）。这个socket对象包含了发送缓冲区、接收缓冲区、等待队列等成员。等待队列是个非常重要的结构，它指向所有需要等待该socket事件的进程。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df961dc470.png" alt="image-20220606205601602"></p>
+<p>当程序执行到recv时，操作系统会将进程A从工作队列移动到该socket的等待队列中（如下图）。由于工作队列只剩下了进程B和C，依据进程调度，cpu会轮流执行这两个进程的程序，不会执行进程A的程序。<strong>所以进程A被阻塞，不会往下执行代码，也不会占用cpu资源。</strong></p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629df96ce0ba2.png" alt="image-20220606205612628"></p>
+<p>ps：操作系统添加等待队列只是添加了对这个“等待中”进程的引用，以便在接收到数据时获取进程对象、将其唤醒，而非直接将进程管理纳入自己之下。上图为了方便说明，直接将进程挂到等待队列之下。</p>
+<h4 id="唤醒进程"><a href="#唤醒进程" class="headerlink" title="唤醒进程"></a>唤醒进程</h4><p>当socket接收到数据后，操作系统将该socket等待队列上的进程重新放回到工作队列，该进程变成运行状态，继续执行代码。也由于socket的接收缓冲区已经有了数据，recv可以返回接收到的数据。</p>
+<h3 id="内核接收网络数据全过程"><a href="#内核接收网络数据全过程" class="headerlink" title="内核接收网络数据全过程"></a>内核接收网络数据全过程</h3><p><strong>这一步，贯穿网卡、中断、进程调度的知识，叙述阻塞recv下，内核接收数据全过程。</strong></p>
+<p>如下图所示，进程在recv阻塞期间</p>
+<p>（步骤①）计算机收到了对端传送的数据</p>
+<p>（步骤②）数据经由网卡传送到内存</p>
+<p>（步骤③）然后网卡通过中断信号通知cpu有数据到达，cpu执行中断程序</p>
+<p>（步骤④）此处的中断程序主要有两项功能，先将网络数据写入到对应socket的接收缓冲区里面</p>
+<p>（步骤⑤）再唤醒进程A</p>
+<p>（步骤⑥）重新将进程A放入工作队列中。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629dfb2bce6f1.png" alt="image-20220606210339517"></p>
+<p>唤醒进程的过程如下图所示。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629dfb3dc0e38.png" alt="image-20220606210357481"></p>
+<p><strong>以上是内核接收数据全过程</strong></p>
+<p>这里留有两个思考题，大家先想一想。</p>
+<p>其一，操作系统如何知道网络数据对应于哪个socket？</p>
+<p>其二，如何同时监视多个socket的数据？</p>
+<p>（——我是分割线，想好了才能往下看哦~）</p>
+<p>公布答案的时刻到了。</p>
+<p>第一个问题：因为一个socket对应着一个端口号，而网络数据包中包含了ip和端口的信息，内核可以通过端口号找到对应的socket。当然，为了提高处理速度，操作系统会维护端口号到socket的索引结构，以快速读取。</p>
+<p>第二个问题是<strong>多路复用的重中之重</strong>，是本文后半部分的重点！</p>
+<h3 id="同时监视多个socket的简单方法"><a href="#同时监视多个socket的简单方法" class="headerlink" title="同时监视多个socket的简单方法"></a>同时监视多个socket的简单方法</h3><p>服务端需要管理多个客户端连接，而recv只能监视单个socket，这种矛盾下，人们开始寻找监视多个socket的方法。epoll的要义是高效的监视多个socket。从历史发展角度看，必然先出现一种不太高效的方法，人们再加以改进。只有先理解了不太高效的方法，才能够理解epoll的本质。</p>
+<p>假如能够预先传入一个socket列表，<strong>如果列表中的socket都没有数据，挂起进程，直到有一个socket收到数据，唤醒进程</strong>。这种方法很直接，也是select的设计思想。</p>
+<p>为方便理解，我们先复习select的用法。在如下的代码中，先准备一个数组（下面代码中的fds），让fds存放着所有需要监视的socket。然后调用select，如果fds中的所有socket都没有数据，select会阻塞，直到有一个socket接收到数据，select返回，唤醒进程。用户可以遍历fds，通过FD_ISSET判断具体哪个socket收到数据，然后做出处理。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> s = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line"><span class="built_in">bind</span>(s, ...);</span><br><span class="line"><span class="built_in">listen</span>(s, ...);</span><br><span class="line"><span class="type">int</span> fds[] = 存放需要监听的socket</span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line">	<span class="type">int</span> n = <span class="built_in">select</span>(..., fds, ...)</span><br><span class="line">	<span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i &lt; fds.count; i++)&#123;</span><br><span class="line">	<span class="keyword">if</span>(<span class="built_in">FD_ISSET</span>(fds[i], ...))&#123;</span><br><span class="line"> 	<span class="comment">//fds[i]的数据处理</span></span><br><span class="line"> &#125;</span><br><span class="line"> &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>select的流程</strong></p>
+<p>select的实现思路很直接。假如程序同时监视如下图的sock1、sock2和sock3三个socket，那么在调用select之后，操作系统把进程A分别加入这三个socket的等待队列中。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629dfe04c5a90.png" alt="image-20220606211548473"></p>
+<p>当任何一个socket收到数据后，中断程序将唤起进程。下图展示了sock2接收到了数据的处理流程。</p>
+<p>ps：recv和select的中断回调可以设置成不同的内容。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629dfec923180.png" alt="image-20220606211904832"></p>
+<p>所谓唤起进程，就是将进程从所有的等待队列中移除，加入到工作队列里面。如下图所示。</p>
+<p><img src="https://kinnx.xyz/i/2022/06/06/629dfed937ad3.png" alt="image-20220606211920910"></p>
+<p>经由这些步骤，当进程A被唤醒后，它知道至少有一个socket接收了数据。程序只需遍历一遍socket列表，就可以得到就绪的socket。</p>
+<p>这种简单方式行之有效，在几乎所有操作系统都有对应的实现。</p>
+<p>但是简单的方法往往有缺点，主要是：</p>
+<p>①  每次调用select都需要将进程加入到所有监视socket的等待队列，每次唤醒都需要从每个队列中移除。这里涉及了两次遍历，而且每次都要将整个fds列表传递给内核，有一定的开销。正是因为遍历操作开销大，出于效率的考量，才会规定select的最大监视数量，默认只能监视1024个socket。</p>
+<p>②  进程被唤醒后，程序并不知道哪些socket收到数据，还需要遍历一次。</p>
+<p>那么，有没有减少遍历的方法？有没有保存就绪socket的方法？这两个问题便是epoll技术要解决的。</p>
+<p>补充说明：本节只解释了select的一种情形。当程序调用select时，内核会先遍历一遍socket，如果有一个以上的socket接收缓冲区有数据，那么select直接返回，不会阻塞。这也是为什么select的返回值有可能大于1的原因之一。如果没有socket有数据，进程才会阻塞。</p>
+<h3 id="epoll的设计思路"><a href="#epoll的设计思路" class="headerlink" title="epoll的设计思路"></a>epoll的设计思路</h3><p>epoll是在select出现N多年后才被发明的，是select和poll的增强版本。epoll通过以下一些措施来改进效率。</p>
+<h4 id="措施一：功能分离"><a href="#措施一：功能分离" class="headerlink" title="措施一：功能分离"></a><strong>措施一：功能分离</strong></h4><p>select低效的原因之一是将“维护等待队列”和“阻塞进程”两个步骤合二为一。如下图所示，每次调用select都需要这两步操作，然而大多数应用场景中，需要监视的socket相对固定，并不需要每次都修改。epoll将这两个操作分开，先用epoll_ctl维护等待队列，再调用epoll_wait阻塞进程。显而易见的，效率就能得到提升。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e010290282.png" alt="image-20220606212834211" style="zoom:67%;" />
+
+<p>为方便理解后续的内容，我们先复习下epoll的用法。如下的代码中，先用epoll_create创建一个epoll对象epfd，再通过epoll_ctl将需要监视的socket添加到epfd中，最后调用epoll_wait等待数据。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> s = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>); </span><br><span class="line"><span class="built_in">bind</span>(s, ...);</span><br><span class="line"><span class="built_in">listen</span>(s, ...);</span><br><span class="line"><span class="type">int</span> epfd = <span class="built_in">epoll_create</span>(...);</span><br><span class="line"><span class="built_in">epoll_ctl</span>(epfd, ...); <span class="comment">//将所有需要监听的socket添加到epfd中</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>)&#123;</span><br><span class="line"> <span class="type">int</span> n = <span class="built_in">epoll_wait</span>(...)</span><br><span class="line"> <span class="keyword">for</span>(接收到数据的socket)&#123;</span><br><span class="line"> <span class="comment">//处理</span></span><br><span class="line"> &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>功能分离，使得epoll有了优化的可能。</p>
+<h4 id="措施二：就绪列表"><a href="#措施二：就绪列表" class="headerlink" title="措施二：就绪列表"></a><strong>措施二：就绪列表</strong></h4><p>select低效的另一个原因在于程序不知道哪些socket收到数据，只能一个个遍历。如果内核维护一个“就绪列表”，引用收到数据的socket，就能避免遍历。如下图所示，计算机共有三个socket，收到数据的sock2和sock3被rdlist（就绪列表）所引用。当进程被唤醒后，只要获取rdlist的内容，就能够知道哪些socket收到数据。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e02700af3f.png" alt="image-20220606213439703" style="zoom:80%;" />
+
+<h3 id="epoll的原理和流程"><a href="#epoll的原理和流程" class="headerlink" title="epoll的原理和流程"></a>epoll的原理和流程</h3><p>本节会以示例和图表来讲解epoll的原理和流程。</p>
+<h4 id="创建epoll对象"><a href="#创建epoll对象" class="headerlink" title="创建epoll对象"></a><strong>创建epoll对象</strong></h4><p>如下图所示，当某个进程调用epoll_create方法时，内核会创建一个eventpoll对象（也就是程序中epfd所代表的对象）。eventpoll对象也是文件系统中的一员，和socket一样，它也会有等待队列。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e02a342e47.png" alt="image-20220606213530935" style="zoom:80%;" />
+
+<p>创建一个代表该epoll的eventpoll对象是必须的，因为内核要维护“就绪列表”等数据，“就绪列表”可以作为eventpoll的成员。</p>
+<h4 id="维护监视列表"><a href="#维护监视列表" class="headerlink" title="维护监视列表"></a><strong>维护监视列表</strong></h4><p>创建epoll对象后，可以用epoll_ctl添加或删除所要监听的socket。以添加socket为例，如下图，如果通过epoll_ctl添加sock1、sock2和sock3的监视，内核会将eventpoll添加到这三个socket的等待队列中。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e0320da8dd.png" alt="image-20220606213736545" style="zoom:80%;" />
+
+<p>当socket收到数据后，中断程序会操作eventpoll对象，而不是直接操作进程。</p>
+<h4 id="接收数据"><a href="#接收数据" class="headerlink" title="接收数据"></a><strong>接收数据</strong></h4><p>当socket收到数据后，中断程序会给eventpoll的“就绪列表”添加socket引用。如下图展示的是sock2和sock3收到数据后，中断程序让rdlist引用这两个socket。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e03308aa65.png" alt="image-20220606213752232" style="zoom:80%;" />
+
+<p>eventpoll对象相当于是socket和进程之间的中介，socket的数据接收并不直接影响进程，而是通过改变eventpoll的就绪列表来改变进程状态。</p>
+<p>当程序执行到epoll_wait时，如果rdlist已经引用了socket，那么epoll_wait直接返回，如果rdlist为空，阻塞进程。</p>
+<h4 id="阻塞和唤醒进程"><a href="#阻塞和唤醒进程" class="headerlink" title="阻塞和唤醒进程"></a><strong>阻塞和唤醒进程</strong></h4><p>假设计算机中正在运行进程A和进程B，在某时刻进程A运行到了epoll_wait语句。如下图所示，内核会将进程A放入eventpoll的等待队列中，阻塞进程。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e037feb4ba.png" alt="image-20220606213911229" style="zoom:80%;" />
+
+<p>当socket接收到数据，中断程序一方面修改rdlist，另一方面唤醒eventpoll等待队列中的进程，进程A再次进入运行状态（如下图）。也因为rdlist的存在，进程A可以知道哪些socket发生了变化。</p>
+<img src="https://kinnx.xyz/i/2022/06/06/629e0387a787e.png" alt="image-20220606213919341" style="zoom:80%;" />
+
+<h3 id="epoll的数据结构"><a href="#epoll的数据结构" class="headerlink" title="epoll的数据结构"></a>epoll的数据结构</h3><p>如下图所示，eventpoll包含了。。等成员</p>
+<p>wq：等待队列链表。软中断数据就绪的时候会通过wq来找到阻塞在epoll对象上的用户进程。</p>
+<p>rbr：一棵红黑树。为了支持对海量连接的高效查找、插入和删除，eventpoll内部使用了一棵红黑树。通过这棵树来管理用户进程下添加进来的所有socket连接。</p>
+<p>rdllist：就绪的描述符的链表。当有的连接就绪的时候，内核会把就绪的连接放到rdllist链表里。这样应用进程只需要判断链表就能找出就绪进程，而不用去遍历整棵树。</p>
+<p><strong>就绪列表的数据结构</strong></p>
+<p>就绪列表引用着<strong>就绪</strong>的socket，所以它应能够快速的插入数据。</p>
+<p>程序可能随时调用epoll_ctl添加监视socket，也可能随时删除。当删除时，若该socket已经存放在就绪列表中，它也应该被移除。</p>
+<p>所以就绪列表应是一种能够快速插入和删除的数据结构。双向链表就是这样一种数据结构，epoll使用双向链表来实现就绪队列（对应上图的rdllist）。</p>
+<p><strong>索引结构</strong></p>
+<p>既然epoll将“维护监视队列”和“进程阻塞”分离，也意味着需要有个数据结构来保存监视的socket。至少要方便的添加和移除，还要便于搜索，以避免重复添加。红黑树是一种自平衡二叉查找树，搜索、插入和删除时间复杂度都是O(log(N))，效率较好。epoll使用了红黑树作为索引结构（对应上图的rbr）。</p>
+<p>ps：因为操作系统要兼顾多种功能，以及由更多需要保存的数据，rdlist并非直接引用socket，而是通过<strong>epitem</strong>(红黑树节点对象）间接引用。</p>
+<h3 id="一图总结epoll工作流程"><a href="#一图总结epoll工作流程" class="headerlink" title="一图总结epoll工作流程"></a>一图总结epoll工作流程</h3><p><img src="https://kinnx.xyz/i/2022/06/06/629e1482b1669.png" alt="image-20220606225146111"></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/361750240">https://zhuanlan.zhihu.com/p/361750240</a> 万字长文epoll具体实施细节</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/31/assert/" rel="prev" title="assert">
+      <i class="fa fa-chevron-left"></i> assert
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E7%BD%91%E5%8D%A1%E6%8E%A5%E6%94%B6%E6%95%B0%E6%8D%AE%E8%AF%B4%E8%B5%B7"><span class="nav-number">1.</span> <span class="nav-text">从网卡接收数据说起</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%9F%A5%E9%81%93%E6%8E%A5%E6%94%B6%E4%BA%86%E6%95%B0%E6%8D%AE%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">如何知道接收了数据？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%98%BB%E5%A1%9E%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%8D%A0%E7%94%A8cpu%E8%B5%84%E6%BA%90%EF%BC%9F"><span class="nav-number">3.</span> <span class="nav-text">进程阻塞为什么不占用cpu资源？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E9%98%9F%E5%88%97"><span class="nav-number">3.1.</span> <span class="nav-text">工作队列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AD%89%E5%BE%85%E9%98%9F%E5%88%97"><span class="nav-number">3.2.</span> <span class="nav-text">等待队列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%94%A4%E9%86%92%E8%BF%9B%E7%A8%8B"><span class="nav-number">3.3.</span> <span class="nav-text">唤醒进程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E6%8E%A5%E6%94%B6%E7%BD%91%E7%BB%9C%E6%95%B0%E6%8D%AE%E5%85%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">内核接收网络数据全过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E6%97%B6%E7%9B%91%E8%A7%86%E5%A4%9A%E4%B8%AAsocket%E7%9A%84%E7%AE%80%E5%8D%95%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">同时监视多个socket的简单方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="nav-number">6.</span> <span class="nav-text">epoll的设计思路</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%AA%E6%96%BD%E4%B8%80%EF%BC%9A%E5%8A%9F%E8%83%BD%E5%88%86%E7%A6%BB"><span class="nav-number">6.1.</span> <span class="nav-text">措施一：功能分离</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%AA%E6%96%BD%E4%BA%8C%EF%BC%9A%E5%B0%B1%E7%BB%AA%E5%88%97%E8%A1%A8"><span class="nav-number">6.2.</span> <span class="nav-text">措施二：就绪列表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll%E7%9A%84%E5%8E%9F%E7%90%86%E5%92%8C%E6%B5%81%E7%A8%8B"><span class="nav-number">7.</span> <span class="nav-text">epoll的原理和流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAepoll%E5%AF%B9%E8%B1%A1"><span class="nav-number">7.1.</span> <span class="nav-text">创建epoll对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%B4%E6%8A%A4%E7%9B%91%E8%A7%86%E5%88%97%E8%A1%A8"><span class="nav-number">7.2.</span> <span class="nav-text">维护监视列表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E6%94%B6%E6%95%B0%E6%8D%AE"><span class="nav-number">7.3.</span> <span class="nav-text">接收数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E5%92%8C%E5%94%A4%E9%86%92%E8%BF%9B%E7%A8%8B"><span class="nav-number">7.4.</span> <span class="nav-text">阻塞和唤醒进程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">8.</span> <span class="nav-text">epoll的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E5%9B%BE%E6%80%BB%E7%BB%93epoll%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-number">9.</span> <span class="nav-text">一图总结epoll工作流程</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Kinnx</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kinnx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
